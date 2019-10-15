@@ -1052,6 +1052,16 @@ bool AtomBrowserClient::PreSpawnRenderer(sandbox::TargetPolicy* policy,
       sandbox::TargetPolicy::FILES_ALLOW_ANY, L"\\??\\pipe\\crashpad_*");
   if (result != sandbox::SBOX_ALL_OK)
     return false;
+
+  if ((flags & RendererSpawnFlags::RENDERER_CODE_INTEGRITY) == 0)
+    return true;
+
+  sandbox::MitigationFlags mitigations = policy->GetProcessMitigations();
+  mitigations |= sandbox::MITIGATION_FORCE_MS_SIGNED_BINS;
+  result = policy->SetProcessMitigations(mitigations);
+  if (result != sandbox::SBOX_ALL_OK)
+    return false;
+
   return true;
 }
 #endif  // defined(OS_WIN)
@@ -1068,6 +1078,14 @@ bool AtomBrowserClient::BindAssociatedReceiverFromFrame(
   }
 
   return false;
+}
+
+void AtomBrowserClient::EnableRendererCodeIntegrity() {
+  enable_renderer_code_integrity_ = true;
+}
+
+bool AtomBrowserClient::IsRendererCodeIntegrityEnabled() {
+  return enable_renderer_code_integrity_;
 }
 
 std::string AtomBrowserClient::GetApplicationLocale() {
