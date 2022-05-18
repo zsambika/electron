@@ -55,9 +55,6 @@ class SerialChooserContext : public KeyedService,
   SerialChooserContext(const SerialChooserContext&) = delete;
   SerialChooserContext& operator=(const SerialChooserContext&) = delete;
 
-  // ObjectPermissionContextBase::PermissionObserver:
-  void OnPermissionRevoked(const url::Origin& origin);
-
   // Serial-specific interface for granting and checking permissions.
   void GrantPortPermission(const url::Origin& origin,
                            const device::mojom::SerialPortInfo& port,
@@ -83,8 +80,10 @@ class SerialChooserContext : public KeyedService,
   // SerialPortManagerClient implementation.
   void OnPortAdded(device::mojom::SerialPortInfoPtr port) override;
   void OnPortRemoved(device::mojom::SerialPortInfoPtr port) override;
-  void RevokePortPermissionWebInitiated(const url::Origin& origin,
-                                        const base::UnguessableToken& token);
+  void RevokePortPermissionWebInitiated(
+      const url::Origin& origin,
+      const base::UnguessableToken& token,
+      content::RenderFrameHost* render_frame_host);
   // Only call this if you're sure |port_info_| has been initialized
   // before-hand. The returned raw pointer is owned by |port_info_| and will be
   // destroyed when the port is removed.
@@ -95,10 +94,8 @@ class SerialChooserContext : public KeyedService,
   void EnsurePortManagerConnection();
   void SetUpPortManagerConnection(
       mojo::PendingRemote<device::mojom::SerialPortManager> manager);
+  void OnGetDevices(std::vector<device::mojom::SerialPortInfoPtr> ports);
   void OnPortManagerConnectionError();
-  void RevokeObjectPermissionInternal(const url::Origin& origin,
-                                      const base::Value& object,
-                                      bool revoked_by_website);
 
   mojo::Remote<device::mojom::SerialPortManager> port_manager_;
   mojo::Receiver<device::mojom::SerialPortManagerClient> client_receiver_{this};

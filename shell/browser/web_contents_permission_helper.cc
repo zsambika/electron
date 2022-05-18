@@ -215,6 +215,15 @@ void WebContentsPermissionHelper::GrantSerialPortPermission(
       &device, render_frame_host);
 }
 
+void WebContentsPermissionHelper::RevokeSerialPortPermission(
+    const url::Origin& origin,
+    base::Value port,
+    content::RenderFrameHost* render_frame_host) const {
+  return RevokeDevicePermission(
+      static_cast<blink::PermissionType>(PermissionType::SERIAL), origin, &port,
+      render_frame_host);
+}
+
 bool WebContentsPermissionHelper::CheckHIDAccessPermission(
     const url::Origin& embedding_origin) const {
   base::DictionaryValue details;

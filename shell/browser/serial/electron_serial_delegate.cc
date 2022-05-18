@@ -84,14 +84,14 @@ void ElectronSerialDelegate::RemoveObserver(content::RenderFrameHost* frame,
 void ElectronSerialDelegate::RevokePortPermissionWebInitiated(
     content::RenderFrameHost* frame,
     const base::UnguessableToken& token) {
-  // TODO(nornagon/jkleinsc): pass this on to the chooser context
+  return GetChooserContext(frame)->RevokePortPermissionWebInitiated(
+      frame->GetMainFrame()->GetLastCommittedOrigin(), token, frame);
 }
 
 const device::mojom::SerialPortInfo* ElectronSerialDelegate::GetPortInfo(
     content::RenderFrameHost* frame,
     const base::UnguessableToken& token) {
-  // TODO(nornagon/jkleinsc): pass this on to the chooser context
-  return nullptr;
+  return GetChooserContext(frame)->GetPortInfo(token);
 }
 
 SerialChooserController* ElectronSerialDelegate::ControllerForFrame(

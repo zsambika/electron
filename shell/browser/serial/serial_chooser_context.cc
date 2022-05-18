@@ -15,7 +15,11 @@
 #include "content/public/browser/device_service.h"
 #include "content/public/browser/web_contents.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
+#include "shell/browser/api/electron_api_session.h"
 #include "shell/browser/web_contents_permission_helper.h"
+#include "shell/common/gin_converters/frame_converter.h"
+#include "shell/common/gin_converters/serial_port_info_converter.h"
+#include "shell/common/gin_helper/dictionary.h"
 
 namespace electron {
 
@@ -90,15 +94,11 @@ SerialChooserContext::SerialChooserContext() = default;
 
 SerialChooserContext::~SerialChooserContext() = default;
 
-void SerialChooserContext::OnPermissionRevoked(const url::Origin& origin) {
-  for (auto& observer : port_observer_list_)
-    observer.OnPermissionRevoked(origin);
-}
-
 void SerialChooserContext::GrantPortPermission(
     const url::Origin& origin,
     const device::mojom::SerialPortInfo& port,
     content::RenderFrameHost* render_frame_host) {
+  port_info_.insert({port.token, port.Clone()});
   base::Value value = PortInfoToValue(port);
   auto* web_contents =
       content::WebContents::FromRenderFrameHost(render_frame_host);
@@ -123,12 +123,30 @@ bool SerialChooserContext::HasPortPermission(
 
 void SerialChooserContext::RevokePortPermissionWebInitiated(
     const url::Origin& origin,
-    const base::UnguessableToken& token) {
+    const base::UnguessableToken& token,
+    content::RenderFrameHost* render_frame_host) {
   auto it = port_info_.find(token);
   if (it == port_info_.end())
     return;
 
-  return OnPermissionRevoked(origin);
+  auto* web_contents =
+      content::WebContents::FromRenderFrameHost(render_frame_host);
+  auto* permission_helper =
+      WebContentsPermissionHelper::FromWebContents(web_contents);
+  permission_helper->RevokeSerialPortPermission(
+      origin, PortInfoToValue(*it->second), render_frame_host);
+
+  api::Session* session =
+      api::Session::FromBrowserContext(web_contents->GetBrowserContext());
+  if (session) {
+    v8::Isolate* isolate = JavascriptEnvironment::GetIsolate();
+    v8::HandleScope scope(isolate);
+    gin_helper::Dictionary details =
+        gin_helper::Dictionary::CreateEmpty(isolate);
+    details.Set("port", it->second);
+    details.SetGetter("frame", render_frame_host);
+    session->Emit("serial-port-revoked", details);
+  }
 }
 
 // static
@@ -190,6 +208,9 @@ base::WeakPtr<SerialChooserContext> SerialChooserContext::AsWeakPtr() {
 }
 
 void SerialChooserContext::OnPortAdded(device::mojom::SerialPortInfoPtr port) {
+  if (!base::Contains(port_info_, port->token)) {
+    port_info_.insert({port->token, port->Clone()});
+  }
   for (auto& observer : port_observer_list_)
     observer.OnPortAdded(*port);
 }
@@ -218,6 +239,15 @@ void SerialChooserContext::SetUpPortManagerConnection(
                      base::Unretained(this)));
 
   port_manager_->SetClient(client_receiver_.BindNewPipeAndPassRemote());
+  port_manager_->GetDevices(base::BindOnce(&SerialChooserContext::OnGetDevices,
+                                           weak_factory_.GetWeakPtr()));
+}
+
+void SerialChooserContext::OnGetDevices(
+    std::vector<device::mojom::SerialPortInfoPtr> ports) {
+  for (auto& port : ports)
+    port_info_.insert({port->token, std::move(port)});
+  is_initialized_ = true;
 }
 
 void SerialChooserContext::OnPortManagerConnectionError() {

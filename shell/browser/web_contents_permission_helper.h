@@ -59,6 +59,10 @@ class WebContentsPermissionHelper
       const url::Origin& origin,
       base::Value device,
       content::RenderFrameHost* render_frame_host) const;
+  void RevokeSerialPortPermission(
+      const url::Origin& origin,
+      base::Value port,
+      content::RenderFrameHost* render_frame_host) const;
   bool CheckHIDAccessPermission(const url::Origin& embedding_origin) const;
   bool CheckHIDDevicePermission(
       const url::Origin& origin,
