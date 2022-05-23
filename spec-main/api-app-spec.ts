@@ -518,8 +518,7 @@ describe('app module', () => {
       expect(webContents.id).to.equal(w.webContents.id);
     });
 
-    // FIXME: re-enable this test on win32.
-    ifit(process.platform !== 'win32')('should emit renderer-process-crashed event when renderer crashes', async () => {
+    it('should emit renderer-process-crashed event when renderer crashes', async () => {
       w = new BrowserWindow({
         show: false,
         webPreferences: {
@@ -536,8 +535,7 @@ describe('app module', () => {
       expect(webContents).to.equal(w.webContents);
     });
 
-    // FIXME: re-enable this test on win32.
-    ifit(process.platform !== 'win32')('should emit render-process-gone event when renderer crashes', async () => {
+    it('should emit render-process-gone event when renderer crashes', async () => {
       w = new BrowserWindow({
         show: false,
         webPreferences: {
