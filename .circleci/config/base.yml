@@ -69,12 +69,14 @@ executors:
     machine: true
 
   linux-arm:
-    resource_class: electronjs/linux-arm
-    machine: true
+    machine:
+      image: ubuntu-2004::current
+    resource_class: arm.large
 
   linux-arm64:
-    resource_class: electronjs/linux-arm64
-    machine: true
+    machine:
+      image: ubuntu-2004::current
+    resource_class: arm.large
 
 # The config expects the following environment variables to be set:
 #  - "SLACK_WEBHOOK" Slack hook URL to send notifications.
