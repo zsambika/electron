@@ -736,7 +736,13 @@ step-setup-linux-for-headless-testing: &step-setup-linux-for-headless-testing
     name: Setup for headless testing
     command: |
       if [ "`uname`" != "Darwin" ]; then
-        sh -e /etc/init.d/xvfb start
+        if [ -f "/etc/init.d/xvfb" ]; then
+          sh -e /etc/init.d/xvfb start
+        else
+          XVFB=/usr/bin/Xvfb
+          XVFBARGS="$DISPLAY -ac -screen 0 1024x768x16 +extension RANDR"
+          /sbin/start-stop-daemon --start --quiet --background --exec $XVFB -- $XVFBARGS        
+        fi
       fi
 
 step-show-goma-stats: &step-show-goma-stats
