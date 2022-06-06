@@ -70,12 +70,12 @@ executors:
 
   linux-arm:
     machine:
-      image: ubuntu-2004::current
+      image: ubuntu-2004:current
     resource_class: arm.large
 
   linux-arm64:
     machine:
-      image: ubuntu-2004::current
+      image: ubuntu-2004:current
     resource_class: arm.large
 
 # The config expects the following environment variables to be set:
