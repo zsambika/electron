@@ -335,6 +335,28 @@ void ElectronPermissionManager::RevokeDevicePermission(
   browser_context->RevokeDevicePermission(origin, device, permission);
 }
 
+std::vector<std::unique_ptr<base::Value>>
+ElectronPermissionManager::GetGrantedDevices(
+    blink::PermissionType permission,
+    const url::Origin& origin,
+    ElectronBrowserContext* browser_context) const {
+  // if (device_permission_handler_.is_null()) {
+  return browser_context->GetGrantedDevices(origin, permission);
+  /*
+} else {
+
+  v8::Isolate* isolate = JavascriptEnvironment::GetIsolate();
+  v8::HandleScope scope(isolate);
+  v8::Local<v8::Object> details = gin::DataObjectBuilder(isolate)
+                                      .Set("deviceType", permission)
+                                      .Set("origin", origin.Serialize())
+                                      .Set("device", device.Clone())
+                                      .Build();
+  return device_permission_handler_.Run(details);
+}
+    */
+}
+
 blink::mojom::PermissionStatus
 ElectronPermissionManager::GetPermissionStatusForCurrentDocument(
     blink::PermissionType permission,

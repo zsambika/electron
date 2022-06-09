@@ -164,12 +164,18 @@ class ElectronBrowserContext : public content::BrowserContext {
                               const base::Value& device,
                               blink::PermissionType permission_type);
 
+  // Returns a boolean indicating if |origin| has been granted permission to
+  // access |device|.
+  bool CheckDevicePermission(const url::Origin& origin,
+                             const base::Value& device,
+                             blink::PermissionType permission_type);
+
   // Returns the list of devices that |origin| has been granted permission to
   // access. To be used in place of
   // ObjectPermissionContextBase::GetGrantedObjects.
-  bool CheckDevicePermission(const url::Origin& origin,
-                             const base::Value& device,
-                             blink::PermissionType permissionType);
+  std::vector<std::unique_ptr<base::Value>> GetGrantedDevices(
+      const url::Origin& origin,
+      blink::PermissionType permission_type);
 
  private:
   ElectronBrowserContext(const std::string& partition,

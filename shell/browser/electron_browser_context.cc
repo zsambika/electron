@@ -505,20 +505,32 @@ bool ElectronBrowserContext::CheckDevicePermission(
     const url::Origin& origin,
     const base::Value& device,
     blink::PermissionType permission_type) {
-  const auto& current_devices_it = granted_devices_.find(permission_type);
-  if (current_devices_it == granted_devices_.end())
-    return false;
-
-  const auto& origin_devices_it = current_devices_it->second.find(origin);
-  if (origin_devices_it == current_devices_it->second.end())
-    return false;
-
-  for (const auto& device_to_compare : origin_devices_it->second) {
+  const std::vector<std::unique_ptr<base::Value>> granted_devices =
+      GetGrantedDevices(origin, permission_type);
+  for (const auto& device_to_compare : granted_devices) {
     if (DoesDeviceMatch(device, device_to_compare.get(), permission_type))
       return true;
   }
-
   return false;
+}
+
+std::vector<std::unique_ptr<base::Value>>
+ElectronBrowserContext::GetGrantedDevices(
+    const url::Origin& origin,
+    blink::PermissionType permission_type) {
+  const auto& current_devices_it = granted_devices_.find(permission_type);
+  if (current_devices_it == granted_devices_.end())
+    return {};
+
+  const auto& origin_devices_it = current_devices_it->second.find(origin);
+  if (origin_devices_it == current_devices_it->second.end())
+    return {};
+
+  std::vector<std::unique_ptr<base::Value>> results;
+  for (const auto& object : origin_devices_it->second)
+    results.push_back(std::make_unique<base::Value>(object->Clone()));
+
+  return results;
 }
 
 // static

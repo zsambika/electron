@@ -104,6 +104,11 @@ class ElectronPermissionManager : public content::PermissionControllerDelegate {
                               const base::Value& object,
                               ElectronBrowserContext* browser_context) const;
 
+  std::vector<std::unique_ptr<base::Value>> GetGrantedDevices(
+      blink::PermissionType permission,
+      const url::Origin& origin,
+      ElectronBrowserContext* browser_context) const;
+
  protected:
   void OnPermissionResponse(int request_id,
                             int permission_id,
