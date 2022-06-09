@@ -26,9 +26,11 @@ class V8ValueConverter {
   V8ValueConverter(const V8ValueConverter&) = delete;
   V8ValueConverter& operator=(const V8ValueConverter&) = delete;
 
+  void SetDateAllowed(bool val);
   void SetRegExpAllowed(bool val);
   void SetFunctionAllowed(bool val);
   void SetStripNullFromObjects(bool val);
+  void SetConvertNegativeZeroToInt(bool val);
   v8::Local<v8::Value> ToV8Value(const base::Value* value,
                                  v8::Local<v8::Context> context) const;
   std::unique_ptr<base::Value> FromV8Value(
@@ -50,17 +52,19 @@ class V8ValueConverter {
                                      const base::Value* value) const;
 
   std::unique_ptr<base::Value> FromV8ValueImpl(FromV8ValueState* state,
-                                               v8::Local<v8::Value> value,
+                                               v8::Local<v8::Value> val,
                                                v8::Isolate* isolate) const;
   std::unique_ptr<base::Value> FromV8Array(v8::Local<v8::Array> array,
                                            FromV8ValueState* state,
                                            v8::Isolate* isolate) const;
-  std::unique_ptr<base::Value> FromNodeBuffer(v8::Local<v8::Value> value,
-                                              FromV8ValueState* state,
-                                              v8::Isolate* isolate) const;
+  std::unique_ptr<base::Value> FromV8ArrayBuffer(v8::Local<v8::Object> val,
+                                                 v8::Isolate* isolate) const;
   std::unique_ptr<base::Value> FromV8Object(v8::Local<v8::Object> object,
                                             FromV8ValueState* state,
                                             v8::Isolate* isolate) const;
+
+  // If true, we will convert Date JavaScript objects to doubles.
+  bool date_allowed_ = false;
 
   // If true, we will convert RegExp JavaScript objects to string.
   bool reg_exp_allowed_ = false;
@@ -71,6 +75,9 @@ class V8ValueConverter {
   // If true, undefined and null values are ignored when converting v8 objects
   // into Values.
   bool strip_null_from_objects_ = false;
+
+  // If true, convert -0 to an integer value (instead of a double).
+  bool convert_negative_zero_to_int_ = false;
 };
 
 }  // namespace electron
