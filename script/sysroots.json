@@ -10,7 +10,7 @@
         "Tarball": "debian_bullseye_arm_sysroot.tar.xz"
     },
     "bullseye_arm64": {
-        "Sha1Sum": "b8714390d44edde81262a6a9c9a417c3fa15c5ed",
+        "Sha1Sum": "29af017a6ac21f98e4110fd2ce585846f90c27eb",
         "SysrootDir": "debian_bullseye_arm64-sysroot",
         "Tarball": "debian_bullseye_arm64_sysroot.tar.xz"
     },
