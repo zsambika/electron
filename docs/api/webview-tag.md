@@ -813,7 +813,7 @@ Returns:
 * `frameName` string
 * `disposition` string - Can be `default`, `foreground-tab`, `background-tab`,
   `new-window`, `save-to-disk` and `other`.
-* `options` BrowserWindowConstructorOptions - The options which should be used for creating the new
+* `options` [BrowserWindowConstructorOptions](structures/browser-window-options.md) - The options which should be used for creating the new
   [`BrowserWindow`](browser-window.md).
 
 Fired when the guest page attempts to open a new browser window.
