@@ -68,7 +68,7 @@ To customize or cancel the creation of the window, you can optionally set an
 override handler with `webContents.setWindowOpenHandler()` from the main
 process. Returning `{ action: 'deny' }` cancels the window. Returning `{
 action: 'allow', overrideBrowserWindowOptions: { ... } }` will allow opening
-the window and setting the [BrowserWindowConstructorOptions](structures/browser-window-options.md) to be used when
+the window and setting the [`BrowserWindowConstructorOptions`](structures/browser-window-options.md) to be used when
 creating the window. Note that this is more powerful than passing options
 through the feature string, as the renderer has more limited privileges in
 deciding security preferences than the main process.
