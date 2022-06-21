@@ -33,7 +33,7 @@ because it is invoked in the main process.
 Returns [`Window`](https://developer.mozilla.org/en-US/docs/Web/API/Window) | null
 
 `features` is a comma-separated key-value list, following the standard format of
-the browser. Electron will parse [BrowserWindowConstructorOptions](structures/browser-window-options.md) out of this
+the browser. Electron will parse [`BrowserWindowConstructorOptions`](structures/browser-window-options.md) out of this
 list where possible, for convenience. For full control and better ergonomics,
 consider using `webContents.setWindowOpenHandler` to customize the
 BrowserWindow creation.
