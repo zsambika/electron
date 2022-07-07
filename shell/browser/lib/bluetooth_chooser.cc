@@ -109,11 +109,6 @@ void BluetoothChooser::AddOrUpdateDevice(const std::string& device_id,
                                          bool is_gatt_connected,
                                          bool is_paired,
                                          int signal_strength_level) {
-  if (refreshing_) {
-    // If the list of bluetooth devices is currently being generated don't fire
-    // an event
-    return;
-  }
   bool changed = false;
   auto entry = device_map_.find(device_id);
   if (entry == device_map_.end()) {
@@ -124,7 +119,7 @@ void BluetoothChooser::AddOrUpdateDevice(const std::string& device_id,
     changed = true;
   }
 
-  if (changed) {
+  if (!refreshing_ && changed) {
     // Emit a select-bluetooth-device handler to allow for user to listen for
     // bluetooth device found.
     bool prevent_default = api_web_contents_->Emit(
