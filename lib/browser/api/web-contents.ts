@@ -23,34 +23,44 @@ const getNextId = function () {
 type PostData = LoadURLOptions['postData']
 
 // Stock page sizes
-const PDFPageSizes: Record<string, ElectronInternal.MediaSize> = {
-  A5: {
-    custom_display_name: 'A5',
-    height_microns: 210000,
-    name: 'ISO_A5',
-    width_microns: 148000
+const PageSizes: Record<string, ElectronInternal.MediaSize> = {
+  A0: {
+    height_microns: 1189000,
+    name: 'ISO_A0',
+    width_microns: 841000
+  },
+  A1: {
+    height_microns: 841000,
+    name: 'ISO_A1',
+    width_microns: 594000
+  },
+  A2: {
+    height_microns: 594000,
+    name: 'ISO_A2',
+    width_microns: 420000
+  },
+  A3: {
+    height_microns: 420000,
+    name: 'ISO_A3',
+    width_microns: 297000
   },
   A4: {
-    custom_display_name: 'A4',
     height_microns: 297000,
     name: 'ISO_A4',
     is_default: 'true',
     width_microns: 210000
   },
-  A3: {
-    custom_display_name: 'A3',
-    height_microns: 420000,
-    name: 'ISO_A3',
-    width_microns: 297000
+  A5: {
+    height_microns: 210000,
+    name: 'ISO_A5',
+    width_microns: 148000
   },
   Legal: {
-    custom_display_name: 'Legal',
     height_microns: 355600,
     name: 'NA_LEGAL',
     width_microns: 215900
   },
   Letter: {
-    custom_display_name: 'Letter',
     height_microns: 279400,
     name: 'NA_LETTER',
     width_microns: 215900
@@ -58,8 +68,7 @@ const PDFPageSizes: Record<string, ElectronInternal.MediaSize> = {
   Tabloid: {
     height_microns: 431800,
     name: 'NA_LEDGER',
-    width_microns: 279400,
-    custom_display_name: 'Tabloid'
+    width_microns: 279400
   }
 } as const;
 
@@ -315,10 +324,7 @@ WebContents.prototype.printToPDF = async function (options) {
 };
 
 WebContents.prototype.print = function (options: ElectronInternal.WebContentsPrintOptions = {}, callback) {
-  // TODO(codebytere): deduplicate argument sanitization by moving rest of
-  // print param logic into new file shared between printToPDF and print
   if (typeof options === 'object') {
-    // Optionally set size for PDF.
     if (options.pageSize !== undefined) {
       const pageSize = options.pageSize;
       if (typeof pageSize === 'object') {
@@ -335,12 +341,11 @@ WebContents.prototype.print = function (options: ElectronInternal.WebContentsPri
 
         options.mediaSize = {
           name: 'CUSTOM',
-          custom_display_name: 'Custom',
           height_microns: height,
           width_microns: width
         };
-      } else if (PDFPageSizes[pageSize]) {
-        options.mediaSize = PDFPageSizes[pageSize];
+      } else if (PageSizes[pageSize]) {
+        options.mediaSize = PageSizes[pageSize];
       } else {
         throw new Error(`Unsupported pageSize: ${pageSize}`);
       }

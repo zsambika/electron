@@ -258,7 +258,6 @@ declare namespace ElectronInternal {
 
   type MediaSize = {
     name: string,
-    custom_display_name: string,
     height_microns: number,
     width_microns: number,
     is_default?: 'true',
