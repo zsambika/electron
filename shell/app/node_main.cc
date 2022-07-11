@@ -249,39 +249,13 @@ int NodeMain(int argc, char* argv[]) {
     }
 
     v8::HandleScope scope(isolate);
-    node::LoadEnvironment(env, node::StartExecutionCallback{});
+    v8::MaybeLocal<v8::Value> loadenv_ret =
+        node::LoadEnvironment(env, node::StartExecutionCallback{});
 
-    env->set_trace_sync_io(env->options()->trace_sync_io);
+    if (loadenv_ret.IsEmpty())  // There has been a JS exception.
+      return 1;
 
-    {
-      v8::SealHandleScope seal(isolate);
-      bool more;
-      env->performance_state()->Mark(
-          node::performance::NODE_PERFORMANCE_MILESTONE_LOOP_START);
-      do {
-        uv_run(env->event_loop(), UV_RUN_DEFAULT);
-
-        gin_env.platform()->DrainTasks(isolate);
-
-        more = uv_loop_alive(env->event_loop());
-        if (more && !env->is_stopping())
-          continue;
-
-        if (!uv_loop_alive(env->event_loop())) {
-          EmitBeforeExit(env);
-        }
-
-        // Emit `beforeExit` if the loop became alive either after emitting
-        // event, or after running some callbacks.
-        more = uv_loop_alive(env->event_loop());
-      } while (more && !env->is_stopping());
-      env->performance_state()->Mark(
-          node::performance::NODE_PERFORMANCE_MILESTONE_LOOP_EXIT);
-    }
-
-    env->set_trace_sync_io(false);
-
-    exit_code = node::EmitExit(env);
+    exit_code = node::SpinEventLoop(env).FromMaybe(1);
 
     node::ResetStdio();
 
