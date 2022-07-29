@@ -1064,8 +1064,7 @@ steps-tests: &steps-tests
           else
             if [ "$TARGET_ARCH" == "arm" ] || [ "$TARGET_ARCH" == "arm64" ]; then
               export ELECTRON_SKIP_NATIVE_MODULE_TESTS=true
-              sudo chown root out/Default/chrome-sandbox
-              sudo chmod 4755 out/Default/chrome-sandbox
+              chmod 4755 out/Default/chrome-sandbox
               (cd electron && node script/yarn test --runners=main --trace-uncaught --enable-logging)
               (cd electron && node script/yarn test --runners=remote --trace-uncaught --enable-logging)
             else
