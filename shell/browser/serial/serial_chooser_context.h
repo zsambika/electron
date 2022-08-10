@@ -79,6 +79,9 @@ class SerialChooserContext : public KeyedService,
 
   bool is_initialized_ = false;
 
+  // Tracks the set of ports to which an origin has access to.
+  std::map<url::Origin, std::set<base::UnguessableToken>> ephemeral_ports_;
+
   // Map from port token to port info.
   std::map<base::UnguessableToken, device::mojom::SerialPortInfoPtr> port_info_;
 
@@ -97,6 +100,7 @@ class SerialChooserContext : public KeyedService,
   void EnsurePortManagerConnection();
   void SetUpPortManagerConnection(
       mojo::PendingRemote<device::mojom::SerialPortManager> manager);
+  void OnGetDevices(std::vector<device::mojom::SerialPortInfoPtr> ports);
   void OnPortManagerConnectionError();
   void RevokeObjectPermissionInternal(const url::Origin& origin,
                                       const base::Value& object,

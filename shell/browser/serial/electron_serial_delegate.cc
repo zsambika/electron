@@ -56,10 +56,7 @@ bool ElectronSerialDelegate::HasPortPermission(
     content::RenderFrameHost* frame,
     const device::mojom::SerialPortInfo& port) {
   auto* web_contents = content::WebContents::FromRenderFrameHost(frame);
-  auto* browser_context = web_contents->GetBrowserContext();
-  auto* chooser_context =
-      SerialChooserContextFactory::GetForBrowserContext(browser_context);
-  return chooser_context->HasPortPermission(
+  return GetChooserContext(frame)->HasPortPermission(
       web_contents->GetPrimaryMainFrame()->GetLastCommittedOrigin(), port,
       frame);
 }
@@ -85,14 +82,15 @@ void ElectronSerialDelegate::RemoveObserver(content::RenderFrameHost* frame,
 void ElectronSerialDelegate::RevokePortPermissionWebInitiated(
     content::RenderFrameHost* frame,
     const base::UnguessableToken& token) {
-  // TODO(nornagon/jkleinsc): pass this on to the chooser context
+  auto* web_contents = content::WebContents::FromRenderFrameHost(frame);
+  GetChooserContext(frame)->RevokePortPermissionWebInitiated(
+      web_contents->GetPrimaryMainFrame()->GetLastCommittedOrigin(), token);
 }
 
 const device::mojom::SerialPortInfo* ElectronSerialDelegate::GetPortInfo(
     content::RenderFrameHost* frame,
     const base::UnguessableToken& token) {
-  // TODO(nornagon/jkleinsc): pass this on to the chooser context
-  return nullptr;
+  return GetChooserContext(frame)->GetPortInfo(token);
 }
 
 SerialChooserController* ElectronSerialDelegate::ControllerForFrame(
