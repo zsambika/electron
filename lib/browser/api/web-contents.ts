@@ -447,12 +447,14 @@ WebContents.prototype.loadURL = function (url, options) {
       rejectAndCleanup(-2, 'ERR_FAILED', url);
     };
     const removeListeners = () => {
+      this.removeListener('did-navigate-in-page', finishListener);
       this.removeListener('did-finish-load', finishListener);
       this.removeListener('did-fail-load', failListener);
       this.removeListener('did-start-navigation', navigationListener);
       this.removeListener('did-stop-loading', stopLoadingListener);
       this.removeListener('destroyed', stopLoadingListener);
     };
+    this.on('did-navigate-in-page', finishListener);
     this.on('did-finish-load', finishListener);
     this.on('did-fail-load', failListener);
     this.on('did-start-navigation', navigationListener);

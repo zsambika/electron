@@ -744,6 +744,9 @@ class WebContents : public ExclusiveAccessContext,
   // Whether the guest view has been attached.
   bool attached_ = false;
 
+  // Whether we are currently in a same-page navigation.
+  bool in_same_document_navigation_ = false;
+
   // The zoom controller for this webContents.
   WebContentsZoomController* zoom_controller_ = nullptr;
 

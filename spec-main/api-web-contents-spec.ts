@@ -344,6 +344,21 @@ describe('webContents module', () => {
         .and.have.property('code', 'ERR_FILE_NOT_FOUND');
     });
 
+    it('successfully handles in-page navigations', async () => {
+      const s = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end('<h1>HELLO WORLD</h1>');
+      });
+      await new Promise<void>(resolve => s.listen(0, '127.0.0.1', resolve));
+      const { port } = s.address() as AddressInfo;
+
+      await w.loadURL(`http://127.0.0.1:${port}/default#section1`);
+      await w.loadURL(`http://127.0.0.1:${port}/default#section1`);
+      await w.loadURL(`http://127.0.0.1:${port}/default#section2`);
+
+      s.close();
+    });
+
     // Temporarily disable on WOA until
     // https://github.com/electron/electron/issues/20008 is resolved
     const testFn = (process.platform === 'win32' && process.arch === 'arm64' ? it.skip : it);

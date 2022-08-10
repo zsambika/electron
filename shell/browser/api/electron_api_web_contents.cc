@@ -1711,6 +1711,9 @@ void WebContents::DidStartLoading() {
 }
 
 void WebContents::DidStopLoading() {
+  if (in_same_document_navigation_)
+    return;
+
   auto* web_preferences = WebContentsPreferences::From(web_contents());
   if (web_preferences && web_preferences->ShouldUsePreferredSizeMode())
     web_contents()->GetRenderViewHost()->EnablePreferredSizeMode();
@@ -1844,6 +1847,9 @@ void WebContents::UpdateDraggableRegions(
 
 void WebContents::DidStartNavigation(
     content::NavigationHandle* navigation_handle) {
+  if (navigation_handle->IsSameDocument())
+    in_same_document_navigation_ = true;
+
   EmitNavigationEvent("did-start-navigation", navigation_handle);
 }
 
@@ -1896,6 +1902,7 @@ void WebContents::DidFinishNavigation(
     auto url = navigation_handle->GetURL();
     bool is_same_document = navigation_handle->IsSameDocument();
     if (is_same_document) {
+      in_same_document_navigation_ = false;
       Emit("did-navigate-in-page", url, is_main_frame, frame_process_id,
            frame_routing_id);
     } else {
