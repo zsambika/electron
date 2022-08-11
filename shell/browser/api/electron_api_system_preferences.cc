@@ -11,7 +11,6 @@
 #include "shell/common/node_includes.h"
 #include "ui/gfx/animation/animation.h"
 #include "ui/gfx/color_utils.h"
-#include "ui/native_theme/native_theme.h"
 
 namespace electron::api {
 
@@ -27,16 +26,6 @@ SystemPreferences::~SystemPreferences() {
 #if BUILDFLAG(IS_WIN)
   Browser::Get()->RemoveObserver(this);
 #endif
-}
-
-bool SystemPreferences::IsInvertedColorScheme() {
-  return ui::NativeTheme::GetInstanceForNativeUi()
-             ->GetPlatformHighContrastColorScheme() ==
-         ui::NativeTheme::PlatformHighContrastColorScheme::kDark;
-}
-
-bool SystemPreferences::IsHighContrastColorScheme() {
-  return ui::NativeTheme::GetInstanceForNativeUi()->UserHasContrastPreference();
 }
 
 v8::Local<v8::Value> SystemPreferences::GetAnimationSettings(

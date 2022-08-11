@@ -369,7 +369,6 @@ if (process.platform !== 'win32' || systemPreferences.isAeroGlassEnabled()) {
 
 if (process.platform === 'win32') {
   systemPreferences.on('color-changed', () => { console.log('color changed') })
-  systemPreferences.on('inverted-color-scheme-changed', (_, inverted) => console.log(inverted ? 'inverted' : 'not inverted'))
   console.log('Color for menu is', systemPreferences.getColor('menu'))
 }
 
