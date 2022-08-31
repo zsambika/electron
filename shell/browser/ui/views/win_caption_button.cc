@@ -117,6 +117,10 @@ void WinCaptionButton::SetSize(gfx::Size size) {
 }
 
 int WinCaptionButton::GetBetweenButtonSpacing() const {
+  // only apply button spacing for Windows 11 and higher
+  if (base::win::GetVersion() < base::win::Version::WIN11) {
+    return 0;
+  }
   const int display_order_index = GetButtonDisplayOrderIndex();
   return display_order_index == 0
              ? 0
