@@ -38,6 +38,23 @@ win.webContents.on('input-event', (_, event) => {
 })
 ```
 
+### Behavior Changed: Locations of undocumented `cache`/`userCache` paths changed
+
+The `cache`/`userCache` paths of `app.getPath` API were undocumented and
+pointing to wrong locations on Windows in previous versions, if your app was
+relying on the undocumented behavior you might need to add code to clear old
+cache data and check if the new locations would cause conflicts.
+
+```js
+// On Windows in Electron 23
+app.getPath('cache') // returns %LOCALAPPDATA%
+app.getPath('userCache') // returns %LOCALAPPDATA%/AppName
+
+// On Windows in Electron 22
+app.getPath('cache') // returns %APPDATA%
+app.getPath('userCache') // returns %APPDATA%/AppName
+```
+
 ## Planned Breaking API Changes (22.0)
 
 ### Removed: WebContents `new-window` event
