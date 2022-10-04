@@ -46,7 +46,6 @@ void NetworkContextService::ConfigureNetworkContextParams(
     network::mojom::NetworkContextParams* network_context_params,
     cert_verifier::mojom::CertVerifierCreationParams*
         cert_verifier_creation_params) {
-  bool in_memory = browser_context_->IsOffTheRecord();
   const base::FilePath& path = browser_context_->GetPath();
 
   g_browser_process->system_network_context_manager()
@@ -78,7 +77,7 @@ void NetworkContextService::ConfigureNetworkContextParams(
       network::mojom::CookieManagerParams::New();
 
   // Configure on-disk storage for persistent sessions.
-  if (!in_memory) {
+  if (!browser_context_->IsOffTheRecord()) {
     // Configure the HTTP cache path and size.
     network_context_params->http_cache_directory =
         path.Append(chrome::kCacheDirname);

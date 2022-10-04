@@ -51,6 +51,7 @@ class ElectronBindings;
 class JavascriptEnvironment;
 class NodeBindings;
 class NodeEnvironment;
+class ElectronBrowserContext;
 
 #if BUILDFLAG(ENABLE_ELECTRON_EXTENSIONS)
 class ElectronExtensionsClient;
@@ -99,6 +100,12 @@ class ElectronBrowserMainParts : public content::BrowserMainParts {
 
   Browser* browser() { return browser_.get(); }
   BrowserProcessImpl* browser_process() { return fake_browser_process_.get(); }
+
+#if BUILDFLAG(ENABLE_ELECTRON_EXTENSIONS)
+  ElectronBrowserContext* default_extension_context() {
+    return default_extension_context_.get();
+  }
+#endif
 
  protected:
   // content::BrowserMainParts:
@@ -175,6 +182,7 @@ class ElectronBrowserMainParts : public content::BrowserMainParts {
 #if BUILDFLAG(ENABLE_ELECTRON_EXTENSIONS)
   std::unique_ptr<ElectronExtensionsClient> extensions_client_;
   std::unique_ptr<ElectronExtensionsBrowserClient> extensions_browser_client_;
+  std::unique_ptr<ElectronBrowserContext> default_extension_context_;
 #endif
 
   mojo::Remote<device::mojom::GeolocationControl> geolocation_control_;

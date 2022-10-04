@@ -12,6 +12,7 @@
 #include "base/command_line.h"
 #include "base/feature_list.h"
 #include "base/i18n/rtl.h"
+#include "base/memory/ptr_util.h"
 #include "base/metrics/field_trial.h"
 #include "base/path_service.h"
 #include "base/run_loop.h"
@@ -455,6 +456,10 @@ int ElectronBrowserMainParts::PreMainMessageLoopRun() {
   // url::Add*Scheme are not threadsafe, this helps prevent data races.
   url::LockSchemeRegistries();
 
+#if BUILDFLAG(ENABLE_BUILTIN_SPELLCHECKER)
+  SpellcheckServiceFactory::GetInstance();
+#endif
+
 #if BUILDFLAG(ENABLE_ELECTRON_EXTENSIONS)
   extensions_client_ = std::make_unique<ElectronExtensionsClient>();
   extensions::ExtensionsClient::Set(extensions_client_.get());
@@ -464,12 +469,11 @@ int ElectronBrowserMainParts::PreMainMessageLoopRun() {
       std::make_unique<ElectronExtensionsBrowserClient>();
   extensions::ExtensionsBrowserClient::Set(extensions_browser_client_.get());
 
+  default_extension_context_ =
+      base::WrapUnique(ElectronBrowserContext::From("", false));
+
   extensions::EnsureBrowserContextKeyedServiceFactoriesBuilt();
   extensions::electron::EnsureBrowserContextKeyedServiceFactoriesBuilt();
-#endif
-
-#if BUILDFLAG(ENABLE_BUILTIN_SPELLCHECKER)
-  SpellcheckServiceFactory::GetInstance();
 #endif
 
   content::WebUIControllerFactory::RegisterFactory(
@@ -564,6 +568,10 @@ void ElectronBrowserMainParts::PostMainMessageLoopRun() {
       download_manager->Shutdown();
     }
   }
+
+#if BUILDFLAG(ENABLE_ELECTRON_EXTENSIONS)
+  default_extension_context_.reset();
+#endif
 
   // Destroy node platform after all destructors_ are executed, as they may
   // invoke Node/V8 APIs inside them.

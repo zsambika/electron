@@ -38,6 +38,7 @@
 #include "shell/browser/browser.h"
 #include "shell/browser/electron_browser_client.h"
 #include "shell/browser/electron_browser_context.h"
+#include "shell/browser/electron_browser_main_parts.h"
 #include "shell/browser/extensions/api/runtime/electron_runtime_api_delegate.h"
 #include "shell/browser/extensions/electron_component_extension_resource_manager.h"
 #include "shell/browser/extensions/electron_extension_host_delegate.h"
@@ -101,20 +102,20 @@ bool ElectronExtensionsBrowserClient::IsSameContext(BrowserContext* first,
 
 bool ElectronExtensionsBrowserClient::HasOffTheRecordContext(
     BrowserContext* context) {
-  return false;
+  return context->IsOffTheRecord();
 }
 
 BrowserContext* ElectronExtensionsBrowserClient::GetOffTheRecordContext(
     BrowserContext* context) {
-  // app_shell only supports a single context.
-  return nullptr;
+  return context->IsOffTheRecord() ? context : nullptr;
 }
 
 BrowserContext* ElectronExtensionsBrowserClient::GetOriginalContext(
     BrowserContext* context) {
   DCHECK(context);
   if (context->IsOffTheRecord()) {
-    return ElectronBrowserContext::From("", false);
+    return electron::ElectronBrowserMainParts::Get()
+        ->default_extension_context();
   } else {
     return context;
   }
@@ -133,14 +134,14 @@ ElectronExtensionsBrowserClient::GetContextForRegularAndIncognito(
     content::BrowserContext* context,
     bool force_guest_profile,
     bool force_system_profile) {
-  return context;
+  return GetOriginalContext(context);
 }
 
 content::BrowserContext* ElectronExtensionsBrowserClient::GetRegularProfile(
     content::BrowserContext* context,
     bool force_guest_profile,
     bool force_system_profile) {
-  return context->IsOffTheRecord() ? nullptr : context;
+  return GetOriginalContext(context);
 }
 
 bool ElectronExtensionsBrowserClient::IsGuestSession(

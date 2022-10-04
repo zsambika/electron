@@ -355,10 +355,9 @@ Session::Session(v8::Isolate* isolate, ElectronBrowserContext* browser_context)
 
 Session::~Session() {
   browser_context()->GetDownloadManager()->RemoveObserver(this);
-
 #if BUILDFLAG(ENABLE_BUILTIN_SPELLCHECKER)
   SpellcheckService* service =
-      SpellcheckServiceFactory::GetForContext(browser_context_);
+      SpellcheckServiceFactory::GetForContext(browser_context());
   if (service) {
     service->SetHunspellObserver(nullptr);
   }
@@ -1115,8 +1114,7 @@ v8::Local<v8::Promise> Session::ListWordsInSpellCheckerDictionary() {
 bool Session::AddWordToSpellCheckerDictionary(const std::string& word) {
   // don't let in-memory sessions add spellchecker words
   // because files will persist unintentionally
-  bool is_in_memory = browser_context_->IsOffTheRecord();
-  if (is_in_memory)
+  if (browser_context_->IsOffTheRecord())
     return false;
 
   SpellcheckService* service =
@@ -1136,8 +1134,7 @@ bool Session::AddWordToSpellCheckerDictionary(const std::string& word) {
 bool Session::RemoveWordFromSpellCheckerDictionary(const std::string& word) {
   // don't let in-memory sessions remove spellchecker words
   // because files will persist unintentionally
-  bool is_in_memory = browser_context_->IsOffTheRecord();
-  if (is_in_memory)
+  if (browser_context_->IsOffTheRecord())
     return false;
 
   SpellcheckService* service =
