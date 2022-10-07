@@ -225,7 +225,7 @@ for:
     build_script:
       - ps: >-
           if ($env:TARGET_ARCH -eq 'ia32') {
-            "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\.npmrc
+            "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\spec\.npmrc
           }
       - ps: |
           node script/yarn.js install --frozen-lockfile
