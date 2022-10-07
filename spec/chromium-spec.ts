@@ -24,12 +24,12 @@ describe('reporting api', () => {
   it('sends a report for an intervention', async () => {
     const reporting = new EventEmitter();
 
+    // The Reporting API only works on https with valid certs. To dodge having
+    // to set up a trusted certificate, hack the validator.
     session.defaultSession.setCertificateVerifyProc((req, cb) => {
       cb(0);
     });
 
-    // The Reporting API only works on https with valid certs. To dodge having
-    // to set up a trusted certificate, hack the validator.
     const options = {
       key: fs.readFileSync(path.join(certPath, 'server.key')),
       cert: fs.readFileSync(path.join(certPath, 'server.pem')),
@@ -42,7 +42,9 @@ describe('reporting api', () => {
     };
 
     const server = https.createServer(options, (req, res) => {
+      console.log('req.url: ', req.url);
       if (req.url?.endsWith('report')) {
+        console.log('req.url?.endsWith(\'report\')');
         let data = '';
         req.on('data', (d) => { data += d.toString('utf-8'); });
         req.on('end', () => {
@@ -58,13 +60,16 @@ describe('reporting api', () => {
     });
 
     await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+    console.log('await new Promise<void>(resolve => server.listen(0, \'127.0.0.1\', resolve))');
     const bw = new BrowserWindow({ show: false });
 
     try {
       const reportGenerated = emittedOnce(reporting, 'report');
+      console.log('const reportGenerated = emittedOnce(reporting, \'report\')');
       await bw.loadURL(`https://localhost:${(server.address() as any).port}/a`);
 
       const [reports] = await reportGenerated;
+      console.log('const [reports] = await reportGenerated');
       expect(reports).to.be.an('array').with.lengthOf(1);
       const { type, url, body } = reports[0];
       expect(type).to.equal('intervention');
