@@ -4,7 +4,7 @@ parameters:
   run-docs-only:
     type: boolean
     default: false
-  
+
   upload-to-storage:
     type: string
     default: '1'
@@ -140,7 +140,7 @@ env-mas-apple-silicon: &env-mas-apple-silicon
 
 env-send-slack-notifications: &env-send-slack-notifications
   NOTIFY_SLACK: true
-  
+
 env-global: &env-global
   ELECTRON_OUT_DIR: Default
 
@@ -575,7 +575,7 @@ step-electron-build: &step-electron-build
         rm -rf out/Default/clang_x64_v8_arm64/thinlto-cache
         rm -rf out/Default/clang_x64/obj
 
-        # Regenerate because we just deleted some ninja files 
+        # Regenerate because we just deleted some ninja files
         gn gen out/Default --args="import(\"$GN_CONFIG\") import(\"$GN_GOMA_FILE\") $GN_EXTRA_ARGS $GN_BUILDFLAG_ARGS"
       fi
       NINJA_SUMMARIZE_BUILD=1 autoninja -C out/Default electron -j $NUMBER_OF_NINJA_PROCESSES
@@ -741,7 +741,7 @@ step-show-goma-stats: &step-show-goma-stats
   run:
     shell: /bin/bash
     name: Check goma stats after build
-    command: |      
+    command: |
       set +e
       set +o pipefail
       $LOCAL_GOMA_DIR/goma_ctl.py stat
@@ -828,7 +828,7 @@ step-maybe-cross-arch-snapshot: &step-maybe-cross-arch-snapshot
         elif [ "$TARGET_ARCH" == "arm64" ]; then
           export MKSNAPSHOT_PATH="clang_x64_v8_arm64"
         fi
-        cp "out/Default/$MKSNAPSHOT_PATH/mksnapshot" out/Default        
+        cp "out/Default/$MKSNAPSHOT_PATH/mksnapshot" out/Default
         cp "out/Default/$MKSNAPSHOT_PATH/v8_context_snapshot_generator" out/Default
         if [ "`uname`" == "Linux" ]; then
           cp "out/Default/$MKSNAPSHOT_PATH/libffmpeg.so" out/Default
@@ -1142,7 +1142,7 @@ commands:
               else
                 echo 'Using Python install from cache'
               fi
-              sudo installer -pkg python-downloads/python-2.7.18-macosx10.9.pkg -target /        
+              sudo installer -pkg python-downloads/python-2.7.18-macosx10.9.pkg -target /
             fi
       - save_cache:
           paths:
@@ -2054,7 +2054,7 @@ jobs:
     parallelism: 2
     <<: *steps-tests
 
-  osx-testing-arm64-tests:  
+  osx-testing-arm64-tests:
     executor: apple-silicon
     environment:
       <<: *env-mac-large
@@ -2163,9 +2163,9 @@ workflows:
           filters:
             branches:
               # Do not run this on forked pull requests
-              ignore: /pull\/[0-9]+/        
+              ignore: /pull\/[0-9]+/
           requires:
-            - linux-arm-testing      
+            - linux-arm-testing
       - linux-arm64-testing:
           requires:
             - linux-make-src-cache
@@ -2173,7 +2173,7 @@ workflows:
           filters:
             branches:
               # Do not run this on forked pull requests
-              ignore: /pull\/[0-9]+/        
+              ignore: /pull\/[0-9]+/
           requires:
             - linux-arm64-testing
       - linux-arm64-testing-gn-check:

@@ -115,7 +115,7 @@ for:
         } else {
           cd src\electron
           node script\generate-deps-hash.js
-          $depshash = Get-Content .\.depshash -Raw 
+          $depshash = Get-Content .\.depshash -Raw
           $zipfile = "Z:\$depshash.7z"
           cd ..\..
           if (Test-Path -Path $zipfile) {
@@ -135,7 +135,7 @@ for:
               git fetch
               cd ..\..\..
             }
-          } else {    
+          } else {
             # file does not exist, gclient sync, then zip
             $env:RUN_GCLIENT_SYNC="true"
             if ($env:TARGET_ARCH -ne 'ia32') {
@@ -147,7 +147,7 @@ for:
     - if "%RUN_GCLIENT_SYNC%"=="true" ( gclient sync )
     - ps: >-
         if ($env:SAVE_GCLIENT_SRC -eq 'true') {
-          # archive current source for future use 
+          # archive current source for future use
           # only run on x64/woa to avoid contention saving
           $(7z a $zipfile src -xr!android_webview -xr!electron -xr'!*\.git' -xr!third_party\WebKit\LayoutTests! -xr!third_party\blink\web_tests -xr!third_party\blink\perf_tests -slp -t7z -mmt=30)
           if ($LASTEXITCODE -ne 0) {
@@ -155,20 +155,20 @@ for:
           }
           # build time generation of file gen/angle/angle_commit.h depends on
           # third_party/angle/.git
-          # https://chromium-review.googlesource.com/c/angle/angle/+/2074924       
+          # https://chromium-review.googlesource.com/c/angle/angle/+/2074924
           $(7z a $zipfile src\third_party\angle\.git)
           if ($LASTEXITCODE -ne 0) {
             Write-warning "Failed to add third_party\angle\.git; continuing anyway"
           }
           # build time generation of file dawn/common/Version_autogen.h depends on third_party/dawn/.git/HEAD
-          # https://dawn-review.googlesource.com/c/dawn/+/83901        
+          # https://dawn-review.googlesource.com/c/dawn/+/83901
           $(7z a $zipfile src\third_party\dawn\.git)
           if ($LASTEXITCODE -ne 0) {
             Write-warning "Failed to add third_party\dawn\.git; continuing anyway"
           }
         }
     - cd src
-    - set BUILD_CONFIG_PATH=//electron/build/args/%GN_CONFIG%.gn 
+    - set BUILD_CONFIG_PATH=//electron/build/args/%GN_CONFIG%.gn
     - gn gen out/Default "--args=import(\"%BUILD_CONFIG_PATH%\") import(\"%GN_GOMA_FILE%\") %GN_EXTRA_ARGS% "
     - gn check out/Default //electron:electron_lib
     - gn check out/Default //electron:electron_app
@@ -207,7 +207,7 @@ for:
           7z a pdb.zip out\Default\*.pdb
         }
     - python electron/script/zip_manifests/check-zip-manifest.py out/Default/dist.zip electron/script/zip_manifests/dist_zip.win.%TARGET_ARCH%.manifest
-   
+
     deploy_script:
       - cd electron
       - ps: >-
@@ -239,7 +239,7 @@ for:
       - ps: >-
           if ((Test-Path "pdb.zip") -And ($env:GN_CONFIG -ne 'release')) {
             appveyor-retry appveyor PushArtifact pdb.zip
-          }        
+          }
 
   -
     matrix:
@@ -267,7 +267,7 @@ for:
         mkdir out\Default
         cd ..
         # Download build artifacts
-        $apiUrl = 'https://ci.appveyor.com/api'             
+        $apiUrl = 'https://ci.appveyor.com/api'
         $build_info = Invoke-RestMethod -Method Get -Uri "$apiUrl/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/builds/$env:APPVEYOR_BUILD_ID"
         $artifacts_to_download = @('dist.zip','shell_browser_ui_unittests.exe','chromedriver.zip','ffmpeg.zip','node_headers.zip','mksnapshot.zip','electron.lib','builtins-pgo.zip')
         foreach ($job in $build_info.build.jobs) {
@@ -309,6 +309,6 @@ for:
       - echo "Done verifying mksnapshot"
       - echo Verifying chromedriver & python electron\script\verify-chromedriver.py --build-dir out\Default --source-root %cd%
       - echo "Done verifying chromedriver"
-    
+
     on_finish:
       - if exist electron\electron.log ( appveyor-retry appveyor PushArtifact electron\electron.log )

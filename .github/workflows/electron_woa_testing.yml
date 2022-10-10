@@ -1,7 +1,7 @@
 name: Electron WOA Testing
 
 on:
-  push:    
+  push:
     branches: '**'
   workflow_dispatch:
     inputs:
@@ -19,9 +19,9 @@ jobs:
           run: |
             echo "This job is a needed initialization step for Electron WOA testing.  Another test result will appear once the electron-woa-testing build is done."
 
-  electron-woa-testing:    
-    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'electron/electron' }}    
-    runs-on: [self-hosted, woa]  
+  electron-woa-testing:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'electron/electron' }}
+    runs-on: [self-hosted, woa]
     permissions:
       checks: write
       pull-requests: write
@@ -31,9 +31,9 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         name: electron-woa-testing
         status: in_progress
-        details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}    
+        details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         output: |
-          {"summary":"Test In Progress","text_description":"See job details here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}        
+          {"summary":"Test In Progress","text_description":"See job details here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}
     - name: Clean Workspace
       run: |
         Remove-Item * -Recurse -Force
@@ -108,7 +108,7 @@ jobs:
         set npm_config_nodedir=%cd%\out\Default\gen\node_headers
         set npm_config_arch=arm64
         cd electron
-        node script/yarn test --runners=main --enable-logging --disable-features=CalculateNativeWinOcclusion  
+        node script/yarn test --runners=main --enable-logging --disable-features=CalculateNativeWinOcclusion
       env:
         ELECTRON_ENABLE_STACK_DUMPING: true
         ELECTRON_OUT_DIR: Default
@@ -151,7 +151,7 @@ jobs:
         conclusion: "${{ job.status }}"
         details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         output: |
-          {"summary":"Job Succeeded","text_description":"See job details here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}          
+          {"summary":"Job Succeeded","text_description":"See job details here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}
     - uses: LouisBrunner/checks-action@v1.1.1
       if: ${{ ! success() }}
       with:
@@ -160,4 +160,4 @@ jobs:
         conclusion: "${{ job.status }}"
         details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         output: |
-          {"summary":"Job Failed","text_description":"See job details here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}                    
+          {"summary":"Job Failed","text_description":"See job details here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}

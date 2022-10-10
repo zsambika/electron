@@ -29,7 +29,7 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     createWindow()
   })
-  
+
   app.on('open-url', (event, url) => {
     dialog.showErrorBox('Welcome Back', `You arrived from: ${url}`)
   })
