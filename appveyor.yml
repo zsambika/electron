@@ -303,5 +303,5 @@ for:
 
     # Uncomment these lines to enable RDP
     # on_finish:
-    #   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-    #   - if exist electron\electron.log ( appveyor-retry appveyor PushArtifact electron\electron.log )
+      - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+      - if exist electron\electron.log ( appveyor-retry appveyor PushArtifact electron\electron.log )
