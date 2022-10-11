@@ -65,8 +65,13 @@ for:
       - ps: >-
           if ($env:TARGET_ARCH -eq 'ia32') {
             npm set npm_config_arch ia32
+            npm clean-install --arch=ia32
             "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\.npmrc
             "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\spec\.npmrc
+          }
+      - ps: >-
+          if ($env:TARGET_ARCH -ne 'ia32') {
+            node script/yarn.js install --frozen-lockfile
           }
       - ps: |
           node script/yarn.js install --frozen-lockfile
@@ -229,15 +234,19 @@ for:
             Write-warning "Skipping PR build for branch"; Exit-AppveyorBuild
           }
     build_script:
-      # npm clean-install --arch=ia32
       - ps: >-
           if ($env:TARGET_ARCH -eq 'ia32') {
+            npm install
             npm set npm_config_arch ia32
+            npm clean-install --arch=ia32
             "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\.npmrc
             "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\spec\.npmrc
           }
+      - ps: >-
+          if ($env:TARGET_ARCH -ne 'ia32') {
+            node script/yarn.js install --frozen-lockfile
+          }
       - ps: |
-          node script/yarn.js install --frozen-lockfile
           $result = node script/doc-only-change.js --prNumber=$env:APPVEYOR_PULL_REQUEST_NUMBER --prBranch=$env:APPVEYOR_REPO_BRANCH
           Write-Output $result
           if ($result.ExitCode -eq 0) {
