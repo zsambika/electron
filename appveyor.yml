@@ -62,12 +62,9 @@ for:
           }
 
     build_script:
-      - ps: >-
+      - cmd: >-
           if ($env:TARGET_ARCH -eq 'ia32') {
-            npm set npm_config_arch ia32
-            npm clean-install --arch=ia32
-            "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\.npmrc
-            "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\spec\.npmrc
+            SET "npm_config_target_arch=ia32" && SET "npm_config_target_platform=win32"
           }
       - ps: >-
           if ($env:TARGET_ARCH -ne 'ia32') {
@@ -234,13 +231,9 @@ for:
             Write-warning "Skipping PR build for branch"; Exit-AppveyorBuild
           }
     build_script:
-      - ps: >-
+      - cmd: >-
           if ($env:TARGET_ARCH -eq 'ia32') {
-            npm install
-            npm set npm_config_arch ia32
-            npm clean-install --arch=ia32
-            "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\.npmrc
-            "npm_config_arch=ia32" | Out-File -FilePath C:\projects\src\electron\spec\.npmrc
+            SET "npm_config_target_arch=ia32" && SET "npm_config_target_platform=win32"
           }
       - ps: >-
           if ($env:TARGET_ARCH -ne 'ia32') {
