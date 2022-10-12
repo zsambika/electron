@@ -62,13 +62,9 @@ for:
           }
 
     build_script:
-      - cmd: >-
-          if ($env:TARGET_ARCH -eq 'ia32') {
-            SET "npm_config_target_arch=ia32" && SET "npm_config_target_platform=win32"
-          }
       - ps: >-
-          if ($env:TARGET_ARCH -ne 'ia32') {
-            node script/yarn.js install --frozen-lockfile
+          if ($env:TARGET_ARCH -eq 'ia32') {
+            Set-Variable -Name "npm_config_target_arch" -Value "ia32"
           }
       - ps: |
           node script/yarn.js install --frozen-lockfile
@@ -231,9 +227,9 @@ for:
             Write-warning "Skipping PR build for branch"; Exit-AppveyorBuild
           }
     build_script:
-      - cmd: >-
+      - ps: >-
           if ($env:TARGET_ARCH -eq 'ia32') {
-            SET "npm_config_target_arch=ia32" && SET "npm_config_target_platform=win32"
+            Set-Variable -Name "npm_config_target_arch" -Value "ia32"
           }
       - ps: >-
           if ($env:TARGET_ARCH -ne 'ia32') {
