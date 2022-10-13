@@ -11,9 +11,14 @@
 #include "gin/handle.h"
 #include "shell/common/color_util.h"
 #include "shell/common/gin_helper/event_emitter.h"
+#include "ui/views/layout/flex_layout_types.h"
 #include "ui/views/view.h"
 #include "ui/views/view_observer.h"
 #include "v8/include/v8-value.h"
+
+namespace views {
+class FlexSpecification;
+}
 
 namespace electron::api {
 
@@ -38,6 +43,12 @@ class View : public gin_helper::EventEmitter<View>, public views::ViewObserver {
   std::vector<v8::Local<v8::Value>> GetChildren();
   void SetBackgroundColor(absl::optional<WrappedSkColor> color);
   void SetVisible(bool visible);
+  void SetPreferredSize(gfx::Size size);
+  void SetFlexBehavior(views::FlexSpecification spec);
+  void SetMargin(gfx::Insets margin);
+  void SetInternalPadding(gfx::Insets padding);
+  void SetCrossAxisAlignment(views::LayoutAlignment alignment);
+  void SetIgnoredByLayout(bool ignored);
 
   // views::ViewObserver
   void OnViewBoundsChanged(views::View* observed_view) override;

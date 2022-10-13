@@ -142,6 +142,103 @@ struct Converter<views::SizeBounds> {
         .Build();
   }
 };
+
+template <>
+struct Converter<views::MinimumFlexSizeRule> {
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Local<v8::Value> val,
+                     views::MinimumFlexSizeRule* out) {
+    std::string minimum_flex_size_rule = gin::V8ToString(isolate, val);
+    if (minimum_flex_size_rule == "scaleToZero") {
+      *out = views::MinimumFlexSizeRule::kScaleToZero;
+    } else if (minimum_flex_size_rule == "scaleToMinimumSnapToZero") {
+      *out = views::MinimumFlexSizeRule::kScaleToMinimumSnapToZero;
+    } else if (minimum_flex_size_rule == "preferredSnapToZero") {
+      *out = views::MinimumFlexSizeRule::kPreferredSnapToZero;
+    } else if (minimum_flex_size_rule == "scaleToMinimum") {
+      *out = views::MinimumFlexSizeRule::kScaleToMinimum;
+    } else if (minimum_flex_size_rule == "preferredSnapToMinimum") {
+      *out = views::MinimumFlexSizeRule::kPreferredSnapToMinimum;
+    } else if (minimum_flex_size_rule == "preferred") {
+      *out = views::MinimumFlexSizeRule::kPreferred;
+    } else {
+      return false;
+    }
+    return true;
+  }
+};
+
+template <>
+struct Converter<views::MaximumFlexSizeRule> {
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Local<v8::Value> val,
+                     views::MaximumFlexSizeRule* out) {
+    std::string maximum_flex_size_rule = gin::V8ToString(isolate, val);
+    if (maximum_flex_size_rule == "preferred") {
+      *out = views::MaximumFlexSizeRule::kPreferred;
+    } else if (maximum_flex_size_rule == "scaleToMaximum") {
+      *out = views::MaximumFlexSizeRule::kScaleToMaximum;
+    } else if (maximum_flex_size_rule == "unbounded") {
+      *out = views::MaximumFlexSizeRule::kUnbounded;
+    } else {
+      return false;
+    }
+    return true;
+  }
+};
+
+template <>
+struct Converter<views::FlexSpecification> {
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Local<v8::Value> val,
+                     views::FlexSpecification* out) {
+    using JsFlexRule =
+        base::RepeatingCallback<gfx::Size(const views::SizeBounds&)>;
+    JsFlexRule rule;
+    if (gin::ConvertFromV8(isolate, val, &rule)) {
+      *out = views::FlexSpecification(base::BindRepeating(
+          [](JsFlexRule js_rule, const views::View*,
+             const views::SizeBounds& bounds) { return js_rule.Run(bounds); },
+          rule));
+      return true;
+    }
+
+    gin_helper::Dictionary dict;
+    if (!gin::ConvertFromV8(isolate, val, &dict))
+      return false;
+
+    views::MinimumFlexSizeRule min_rule =
+        views::MinimumFlexSizeRule::kPreferred;
+    if (dict.Has("min") && !dict.Get("min", &min_rule))
+      return false;
+    views::MaximumFlexSizeRule max_rule =
+        views::MaximumFlexSizeRule::kPreferred;
+    if (dict.Has("max") && !dict.Get("max", &max_rule))
+      return false;
+    int order = 1;
+    if (dict.Has("order") && !dict.Get("order", &order))
+      return false;
+    int weight = 0;
+    if (dict.Has("weight") && !dict.Get("weight", &weight))
+      return false;
+    views::LayoutAlignment alignment = views::LayoutAlignment::kStretch;
+    if (dict.Has("alignment") && !dict.Get("alignment", &alignment))
+      return false;
+    bool adjust_height_for_width = false;
+    if (dict.Has("adjustHeightForWidth") &&
+        !dict.Get("adjustHeightForWidth", &adjust_height_for_width))
+      return false;
+    *out =
+        views::FlexSpecification(min_rule, max_rule, adjust_height_for_width);
+    if (order != 1)
+      *out = out->WithOrder(order);
+    if (weight != 0)
+      *out = out->WithWeight(weight);
+    if (alignment != views::LayoutAlignment::kStretch)
+      *out = out->WithAlignment(alignment);
+    return true;
+  }
+};
 }  // namespace gin
 
 namespace electron::api {
@@ -182,9 +279,11 @@ View::~View() {
 }
 
 #if BUILDFLAG(ENABLE_VIEWS_API)
-void View::AddChildViewAt(gin::Handle<View> child, absl::optional<size_t> maybe_index) {
+void View::AddChildViewAt(gin::Handle<View> child,
+                          absl::optional<size_t> maybe_index) {
   CHECK(view_);
-  size_t index = std::min(child_views_.size(), maybe_index.value_or(child_views_.size()));
+  size_t index =
+      std::min(child_views_.size(), maybe_index.value_or(child_views_.size()));
   child_views_.emplace(child_views_.begin() + index,     // index
                        isolate(), child->GetWrapper());  // v8::Global(args...)
 #if BUILDFLAG(IS_MAC)
@@ -290,6 +389,36 @@ void View::SetVisible(bool visible) {
   view_->SetVisible(visible);
 }
 
+void View::SetPreferredSize(gfx::Size size) {
+  CHECK(view_);
+  view_->SetPreferredSize(size);
+}
+
+void View::SetFlexBehavior(views::FlexSpecification spec) {
+  CHECK(view_);
+  view_->SetProperty(views::kFlexBehaviorKey, spec);
+}
+
+void View::SetMargin(gfx::Insets margin) {
+  CHECK(view_);
+  view_->SetProperty(views::kMarginsKey, margin);
+}
+
+void View::SetInternalPadding(gfx::Insets padding) {
+  CHECK(view_);
+  view_->SetProperty(views::kInternalPaddingKey, padding);
+}
+
+void View::SetCrossAxisAlignment(views::LayoutAlignment alignment) {
+  CHECK(view_);
+  view_->SetProperty(views::kCrossAxisAlignmentKey, alignment);
+}
+
+void View::SetIgnoredByLayout(bool ignored) {
+  CHECK(view_);
+  view_->SetProperty(views::kViewIgnoredByLayoutKey, ignored);
+}
+
 void View::OnViewBoundsChanged(views::View* observed_view) {
   Emit("bounds-changed");
 }
@@ -342,6 +471,12 @@ void View::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("getBounds", &View::GetBounds)
       .SetMethod("setBackgroundColor", &View::SetBackgroundColor)
       .SetMethod("setLayout", &View::SetLayout)
+      .SetMethod("setPreferredSize", &View::SetPreferredSize)
+      .SetMethod("setFlexBehavior", &View::SetFlexBehavior)
+      .SetMethod("setMargin", &View::SetMargin)
+      .SetMethod("setInternalPadding", &View::SetInternalPadding)
+      .SetMethod("setCrossAxisAlignment", &View::SetCrossAxisAlignment)
+      .SetMethod("setIgnoredByLayout", &View::SetIgnoredByLayout)
       .SetMethod("setVisible", &View::SetVisible);
 #endif
 }

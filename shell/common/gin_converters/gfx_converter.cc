@@ -125,17 +125,17 @@ v8::Local<v8::Value> Converter<gfx::Insets>::ToV8(v8::Isolate* isolate,
 bool Converter<gfx::Insets>::FromV8(v8::Isolate* isolate,
                                     v8::Local<v8::Value> val,
                                     gfx::Insets* out) {
-  gin::Dictionary dict(isolate);
+  gin_helper::Dictionary dict;
   if (!gin::ConvertFromV8(isolate, val, &dict))
     return false;
-  double top, left, right, bottom;
-  if (!dict.Get("top", &top))
+  double top = 0, left = 0, right = 0, bottom = 0;
+  if (dict.Has("top") && !dict.Get("top", &top))
     return false;
-  if (!dict.Get("left", &left))
+  if (dict.Has("left") && !dict.Get("left", &left))
     return false;
-  if (!dict.Get("bottom", &bottom))
+  if (dict.Has("bottom") && !dict.Get("bottom", &bottom))
     return false;
-  if (!dict.Get("right", &right))
+  if (dict.Has("right") && !dict.Get("right", &right))
     return false;
   *out = gfx::Insets::TLBR(top, left, bottom, right);
   return true;
