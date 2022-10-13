@@ -6,9 +6,9 @@ namespace {
 napi_value Print(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
-  napi_status status;
+  napi_status status
 
-  status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+      status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
   if (status != napi_ok)
     return NULL;
 
