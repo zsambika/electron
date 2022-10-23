@@ -375,7 +375,7 @@ void NodeBindings::RegisterBuiltinModules() {
 #endif
   }
   ELECTRON_COMMON_MODULES(V)
-  if (process_type == ::switches::kRendererProcess) {
+  if (!process_type.empty()) {
     ELECTRON_RENDERER_MODULES(V)
   }
   ELECTRON_UTILITY_MODULES(V)
