@@ -170,7 +170,9 @@ export function useRemoteContext (opts?: any) {
   });
   after(() => {
     const w = remoteContext.shift();
-    w!.close();
+    if (w && !w.isDestroyed()) {
+      w!.close();
+    }
   });
 }
 

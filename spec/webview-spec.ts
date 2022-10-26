@@ -1734,7 +1734,7 @@ describe('<webview> tag', function () {
 
   describe('methods', () => {
     let w: WebContents;
-    before(async () => {
+    beforeEach(async () => {
       const window = new BrowserWindow({
         show: false,
         webPreferences: {
@@ -1750,8 +1750,8 @@ describe('<webview> tag', function () {
       await w.executeJavaScript(`{
         document.querySelectorAll('webview').forEach(el => el.remove())
       }`);
+      closeAllWindows();
     });
-    after(closeAllWindows);
 
     describe('<webview>.reload()', () => {
       it('should emit beforeunload handler', async () => {
