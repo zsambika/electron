@@ -1,76 +1,26 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Required for dynamic configuration
-setup: true
-
-# Orbs
-orbs:
-  path-filtering: circleci/path-filtering@0.1.0
-  continuation: circleci/continuation@0.2.0
-
-# All input parameters to pass to build config
-parameters:
-  run-docs-only:
-    type: boolean
-    default: false
-  
-  upload-to-storage:
-    type: string
-    default: '1'
-
-  run-build-linux:
-    type: boolean
-    default: false
-
-  run-build-mac:
-    type: boolean
-    default: false
-
-  run-linux-publish:
-    type: boolean
-    default: false
-
-  linux-publish-arch-limit:
-    type: enum
-    default: all
-    enum: ["all", "arm", "arm64", "x64", "ia32"]
-
-  run-macos-publish:
-    type: boolean
-    default: false
-
-  macos-publish-arch-limit:
-    type: enum
-    default: all
-    enum: ["all", "osx-x64", "osx-arm64", "mas-x64", "mas-arm64"]
-
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  generate-config:
+  say-hello:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      - image: cimg/node:16.14
+      - image: cimg/base:stable
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
-      - path-filtering/set-parameters:
-          base-revision: main
-          mapping: |
-            ^((?!docs/).)*$ run-build-mac true
-            ^((?!docs/).)*$ run-build-linux true
-            docs/.* run-docs-only true
-            ^((?!docs/).)*$ run-docs-only false
       - run:
-          command: |
-            cd .circleci/config
-            yarn
-            export CIRCLECI_BINARY="$HOME/circleci"
-            curl -fLSs https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/master/install.sh | DESTDIR=$CIRCLECI_BINARY bash
-            node build.js
-          name: Pack config.yml
-      - continuation/continue:
-          configuration_path: .circleci/config-staging/built.yml
-          parameters: /tmp/pipeline-parameters.json
+          name: "Say hello"
+          command: "echo Hello, World!"
 
-# Initial setup workflow
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  setup:
+  say-hello-workflow:
     jobs:
-      - generate-config
+      - say-hello
